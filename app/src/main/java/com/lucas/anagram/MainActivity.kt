@@ -76,9 +76,4 @@ class MainActivity : AppCompatActivity() {
             displaytext.text = message
         }
     }
-    suspend fun DownloadListOfString(model : MainViewModel){
-
-
-    }
-
 }
