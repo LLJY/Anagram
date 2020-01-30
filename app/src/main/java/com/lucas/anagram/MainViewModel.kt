@@ -55,35 +55,35 @@ class MainViewModel : ViewModel() {
     }
     //calculate the value in an inline function instead as this long ass function will be used more than once
     inline fun GetStringValue(word: String): Long{
-        var value = 0L
+        var value = 1L
         word.forEach {
-            when(it){
-                'A' -> value += 2
-                'B' -> value += 3
-                'C' -> value += 5
-                'D' -> value += 7
-                'E' -> value += 11
-                'F' -> value += 13
-                'G' -> value += 17
-                'H' -> value += 19
-                'I' -> value += 23
-                'J' -> value += 29
-                'K' -> value += 31
-                'L' -> value += 37
-                'M' -> value += 41
-                'N' -> value += 43
-                'O' -> value += 47
-                'P' -> value += 53
-                'Q' -> value += 59
-                'R' -> value += 61
-                'S' -> value += 67
-                'T' -> value += 71
-                'U' -> value += 73
-                'V' -> value += 79
-                'W' -> value += 83
-                'X' -> value += 89
-                'Y' -> value += 97
-                'Z' -> value += 101
+            when(it.toUpperCase()){
+                'A' -> value *= 2
+                'B' -> value *= 3
+                'C' -> value *= 5
+                'D' -> value *= 7
+                'E' -> value *= 11
+                'F' -> value *= 13
+                'G' -> value *= 17
+                'H' -> value *= 19
+                'I' -> value *= 23
+                'J' -> value *= 29
+                'K' -> value *= 31
+                'L' -> value *= 37
+                'M' -> value *= 41
+                'N' -> value *= 43
+                'O' -> value *= 47
+                'P' -> value *= 53
+                'Q' -> value *= 59
+                'R' -> value *= 61
+                'S' -> value *= 67
+                'T' -> value *= 71
+                'U' -> value *= 73
+                'V' -> value *= 79
+                'W' -> value *= 83
+                'X' -> value *= 89
+                'Y' -> value *= 97
+                'Z' -> value *= 101
             }
         }
         return value
@@ -100,8 +100,8 @@ class MainViewModel : ViewModel() {
         var wd = WordData(word, GetStringValue(word))
         WordsList.forEach{
             //DO NOT bother calculating any string that is larger
-            if(it.Word.length <= wd.Word.length && wd.WordValue == it.WordValue){
-                AnagramsList.add(wd.Word)
+            if(it.Word.length == wd.Word.length && wd.WordValue == it.WordValue){
+                AnagramsList.add(it.Word)
             }
         }
     }

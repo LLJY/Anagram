@@ -1,5 +1,6 @@
 package com.lucas.anagram
 
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.view.isVisible
@@ -14,10 +15,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         var model = ViewModelProvider(this).get(MainViewModel::class.java)
         showProgressCircle(false)
-        //show a grid of 3
-        my_recycler_view.layoutManager = GridLayoutManager(this, 3)
-        GlobalScope.launch {
-            DownloadListOfString(model)
+        val RA = RecyclerAdapter(model.AnagramsList, this@MainActivity)
+        //show a grid of 2(or 3 when landscape) and bind recycler adapter
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            my_recycler_view.layoutManager = GridLayoutManager(this, 3)
+        }else{
+            my_recycler_view.layoutManager = GridLayoutManager(this, 2)
+        }
+        my_recycler_view.adapter = RA
+        if(model.WordsList.size == 0) {
+            GlobalScope.launch {
+                DownloadListOfString(model)
+            }
         }
         charTextbox.setText(model.RandomString)
         randomButton.setOnClickListener{
@@ -33,8 +42,8 @@ class MainActivity : AppCompatActivity() {
                         model.GetAnagrams(word)
                     }
                     asyncTask.await()
-                    my_recycler_view.adapter = RecyclerAdapter(model.AnagramsList, this@MainActivity)
                     //only stop progress circle after bind to feel more seamless.
+                    RA.notifyDataSetChanged()
                     showProgressCircle(false)
                 }
             }
