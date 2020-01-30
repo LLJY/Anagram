@@ -22,7 +22,17 @@ class MainActivity : AppCompatActivity() {
             charTextbox.setText(model.RandomString)
         }
         generateButton.setOnClickListener{
-            progress_circular.isVisible = true
+            if(!charTextbox.text.isNullOrEmpty()){
+                var word = charTextbox.text.toString() //golden rule of android is thou shalt not do ui operations on a seperate thread
+                GlobalScope.launch(Dispatchers.Main) {
+                    showProgressCircle(true)
+                    val asyncTask = async(Dispatchers.Default){
+                        model.GetAnagrams(word)
+                    }
+                    asyncTask.await()
+                    showProgressCircle(false)
+                }
+            }
         }
 
     }
