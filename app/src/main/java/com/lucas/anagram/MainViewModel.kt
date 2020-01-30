@@ -19,7 +19,6 @@ class MainViewModel : ViewModel() {
             var rnd = (0..alphabets.length - 1).random()
             var character = alphabets.get(rnd)
             returnstring = "$returnstring$character"
-            alphabets.drop(rnd)
         }
         RandomString = returnstring
     }
