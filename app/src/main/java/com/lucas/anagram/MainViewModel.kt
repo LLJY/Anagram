@@ -16,9 +16,9 @@ import kotlin.collections.ArrayList
 
 class MainViewModel : ViewModel() {
     var RandomString = ""
-    var WordsList = ArrayList<String>()
+    var WordsList = ArrayList<WordData>()
     fun generateChars(): String {
-        var alphabets = "QWERTYUIOPASDFGHJKLZXCVBNM"
+        val alphabets = "QWERTYUIOPASDFGHJKLZXCVBNM"
         var returnstring = ""
         for (i in 1..10) {
             var rnd = (0..alphabets.length - 1).random()
@@ -28,16 +28,53 @@ class MainViewModel : ViewModel() {
         }
         return returnstring
     }
-    //Get the dictionary full of words and put them into a list accessible via the view model
+
+    /** Get the dictionary full of words and calculate their total value based off the total value of
+     * prime numbers and each alphabet is assigned it's own unique prime, i.e.(A=2, M=41). This ensures a unique number is always calculated for each possible anagram.
+     * We will then insert this unique calculated value.
+     */
     fun GetFile(timeout: Int) {
-        var returnlist = ArrayList<String>()
+        var returnlist = ArrayList<WordData>()
         val end = System.currentTimeMillis()+ timeout //add timeout to current time
         var success = false
         while(System.currentTimeMillis() < end || !success) { //loop until timeout is reached OR function was successfully executed
             val url = URL("https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt")
             try {
                 val input = BufferedReader(InputStreamReader(url.openStream()))
-                returnlist = ArrayList(input.lines().collect(Collectors.toList()).toMutableList())
+                input.lines().forEach{
+                    var value = 0L
+                    it.forEach {
+                        when(it){
+                            'A' -> value += 2
+                            'B' -> value += 3
+                            'C' -> value += 5
+                            'D' -> value += 7
+                            'E' -> value += 11
+                            'F' -> value += 13
+                            'G' -> value += 17
+                            'H' -> value += 19
+                            'I' -> value += 23
+                            'J' -> value += 29
+                            'K' -> value += 31
+                            'L' -> value += 37
+                            'M' -> value += 41
+                            'N' -> value += 43
+                            'O' -> value += 47
+                            'P' -> value += 53
+                            'Q' -> value += 59
+                            'R' -> value += 61
+                            'S' -> value += 67
+                            'T' -> value += 71
+                            'U' -> value += 73
+                            'V' -> value += 79
+                            'W' -> value += 83
+                            'X' -> value += 89
+                            'Y' -> value += 97
+                            'Z' -> value += 101
+                        }
+                    }
+                    returnlist.add(WordData(it, value))
+                }
                 success = true
             } catch (e: IOException) {
                 success = false
@@ -52,4 +89,6 @@ class MainViewModel : ViewModel() {
         }
 
     }
+
 }
+data class WordData(var Word: String, var WordValue: Long)
