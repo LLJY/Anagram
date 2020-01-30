@@ -23,14 +23,26 @@ class MainActivity : AppCompatActivity() {
             my_recycler_view.layoutManager = GridLayoutManager(this, 2)
         }
         my_recycler_view.adapter = RA
+        //if the wordlist has not been downloaded, download it
         if(model.WordsList.size == 0) {
-            GlobalScope.launch {
-                DownloadListOfString(model)
+            //launch coroutine from main to update progress circle
+            GlobalScope.launch(Dispatchers.Main){
+                //show progress circle when executing async task
+                showProgressCircle(true)
+                //launch with IO Dispatcher as it is more suitable for network and I/O related tasks
+                val asynctask = async(Dispatchers.IO){
+                    model.GetFile(10)
+                }
+                //asynchronously wait for task
+                asynctask.await()
+                //do not show progress circle after task has finished
+                showProgressCircle(false)
             }
         }
         charTextbox.setText(model.RandomString)
         randomButton.setOnClickListener{
-            model.RandomString = model.generateChars()
+            //generate characters, and then set text to the textbox
+            model.generateChars()
             charTextbox.setText(model.RandomString)
         }
         generateButton.setOnClickListener{
@@ -59,19 +71,7 @@ class MainActivity : AppCompatActivity() {
         randomButton.isVisible = !bool
     }
     suspend fun DownloadListOfString(model : MainViewModel){
-        //launch coroutine from main to update progress circle
-        GlobalScope.launch(Dispatchers.Main){
-            //show progress circle when executing async task
-            showProgressCircle(true)
-            //launch with IO Dispatcher as it is more suitable for network and I/O related tasks
-            val asynctask = async(Dispatchers.IO){
-                model.GetFile(10)
-            }
-            //asynchronously wait for task
-            asynctask.await()
-            //do not show progress circle after task has finished
-            showProgressCircle(false)
-        }
+
 
     }
 

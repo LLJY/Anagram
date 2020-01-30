@@ -1,24 +1,18 @@
 package com.lucas.anagram
 
-import android.provider.UserDictionary
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URL
-import java.util.*
-import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
 class MainViewModel : ViewModel() {
     var RandomString = ""
     var WordsList = ArrayList<WordData>()
     var AnagramsList = ArrayList<String>()
-    fun generateChars(): String {
+    fun generateChars() {
         val alphabets = "QWERTYUIOPASDFGHJKLZXCVBNM"
         var returnstring = ""
         for (i in 1..10) {
@@ -27,7 +21,7 @@ class MainViewModel : ViewModel() {
             returnstring = "$returnstring$character"
             alphabets.drop(rnd)
         }
-        return returnstring
+        RandomString = returnstring
     }
 
     /** Get the dictionary full of words and calculate their total value based off the total value of
