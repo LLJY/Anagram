@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES)
         setContentView(R.layout.activity_main)
         var model = ViewModelProvider(this).get(MainViewModel::class.java)
-        showProgressCircle(false)
+        showProgressCircle(false, "")
         val RA = RecyclerAdapter(model.AnagramsList, this@MainActivity)
         //show a grid of 2(or 3 when landscape) and bind recycler adapter
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
             //launch coroutine from main to update progress circle
             GlobalScope.launch(Dispatchers.Main){
                 //show progress circle when executing async task
-                showProgressCircle(true)
+                showProgressCircle(true, "Downloading Dictionary...")
                 //launch with IO Dispatcher as it is more suitable for network and I/O related tasks
                 val asynctask = async(Dispatchers.IO){
                     model.GetFile(10)
@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
                 //asynchronously wait for task
                 asynctask.await()
                 //do not show progress circle after task has finished
-                showProgressCircle(false)
+                showProgressCircle(false, "")
             }
         }
         charTextbox.setText(model.RandomString)
@@ -52,26 +52,29 @@ class MainActivity : AppCompatActivity() {
             if(!charTextbox.text.isNullOrEmpty()){
                 var word = charTextbox.text.toString() //golden rule of android is thou shalt not do ui operations on a seperate thread
                 GlobalScope.launch(Dispatchers.Main) {
-                    showProgressCircle(true)
+                    showProgressCircle(true, "Finding Anagrams...")
                     val asyncTask = async(Dispatchers.Default){
                         model.GetAnagrams(word)
                     }
                     asyncTask.await()
                     //only stop progress circle after bind to feel more seamless.
                     RA.notifyDataSetChanged()
-                    showProgressCircle(false)
+                    showProgressCircle(false, "")
                 }
             }
         }
 
     }
-    private inline fun showProgressCircle(bool: Boolean){
+    private inline fun showProgressCircle(bool: Boolean, message: String){
         //hide and show certain ui elements when progress circle is active
         my_recycler_view.isVisible = !bool
         progress_circular.isVisible = bool
         displaytext.isVisible = bool
         generateButton.isVisible = !bool
         randomButton.isVisible = !bool
+        if(bool) {
+            displaytext.text = message
+        }
     }
     suspend fun DownloadListOfString(model : MainViewModel){
 
