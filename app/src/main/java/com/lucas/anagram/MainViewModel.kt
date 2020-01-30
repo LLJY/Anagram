@@ -17,6 +17,7 @@ import kotlin.collections.ArrayList
 class MainViewModel : ViewModel() {
     var RandomString = ""
     var WordsList = ArrayList<WordData>()
+    var AnagramsList = ArrayList<String>()
     fun generateChars(): String {
         val alphabets = "QWERTYUIOPASDFGHJKLZXCVBNM"
         var returnstring = ""
@@ -87,11 +88,22 @@ class MainViewModel : ViewModel() {
         }
         return value
     }
+
+    /***
+     * the purpose of the function should be self explanatory if you understood the documentation above.
+     * If the word's value is equal to the anagram's value, they are both anagrams and we will add it to the list.
+     * We will run this function asynchronously as it is rather heavy due to having to loop through thousands of words im the provided list.
+     */
     fun GetAnagrams(word: String) {
+        //clear the list before starting
+        AnagramsList.clear()
+        var wd = WordData(word, GetStringValue(word))
         WordsList.forEach{
-
+            //DO NOT bother calculating any string that is larger
+            if(it.Word.length <= wd.Word.length && wd.WordValue == it.WordValue){
+                AnagramsList.add(wd.Word)
+            }
         }
-
     }
 
 }
