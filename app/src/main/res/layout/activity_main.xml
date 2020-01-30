@@ -41,7 +41,7 @@
         app:layout_constraintStart_toEndOf="@id/randomButton"
         app:layout_constraintEnd_toEndOf="@id/charTextbox" />
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/randomButton"
         app:layout_constraintStart_toStartOf="parent"

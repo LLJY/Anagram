@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 
@@ -13,6 +14,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         var model = ViewModelProvider(this).get(MainViewModel::class.java)
         showProgressCircle(false)
+        //show a grid of 3
+        my_recycler_view.layoutManager = GridLayoutManager(this, 3)
         GlobalScope.launch {
             DownloadListOfString(model)
         }
@@ -30,6 +33,8 @@ class MainActivity : AppCompatActivity() {
                         model.GetAnagrams(word)
                     }
                     asyncTask.await()
+                    my_recycler_view.adapter = RecyclerAdapter(model.AnagramsList, this@MainActivity)
+                    //only stop progress circle after bind to feel more seamless.
                     showProgressCircle(false)
                 }
             }
