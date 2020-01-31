@@ -1,13 +1,16 @@
 package com.lucas.anagram
 
+import android.provider.Settings
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.math.BigInteger
 import java.net.URL
 import kotlin.collections.ArrayList
+import kotlinx.coroutines.*
 
 class MainViewModel : ViewModel() {
     var RandomString = ""
@@ -28,24 +31,41 @@ class MainViewModel : ViewModel() {
      * prime numbers and each alphabet is assigned it's own unique prime, i.e.(A=2, M=41). This ensures a unique number is always calculated for each possible anagram.
      * We will then insert this unique calculated value.
      */
-    fun GetFile(timeout: Int): Boolean {
+    suspend fun GetFile(timeout: Int): Boolean {
         var returnlist = ArrayList<WordData>()
-        val end = System.currentTimeMillis()+ timeout //add timeout to current time
-        while(System.currentTimeMillis() < end) { //loop until timeout is reached OR function was successfully executed
-            val url = URL("https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt")
-            try {
-                val input = BufferedReader(InputStreamReader(url.openStream()))
-                input.lines().forEach{
-                    returnlist.add(WordData(it, GetStringValue(it)))
-                }
-                WordsList = returnlist
-                return true
-            } catch (e: IOException) {
-                Log.e("ERROR: IOException", "An error has occurred")
+        val url = URL("https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt")
+        try {
+            val input = BufferedReader(InputStreamReader(url.openStream()))
+            var list = ArrayList<String>()
+            input.lines().forEach{
+                list.add(it)
             }
+            val nproc = Runtime.getRuntime().availableProcessors()
+            //split list into nproc x 2 number of lists
+            val parallellist = ArrayList(list.chunked(list.size/(nproc*2)))
+            var asynclist = ArrayList<Deferred<List<WordData>>>()
+            parallellist.forEach{
+                asynclist.add(viewModelScope.async {
+                    GenerateWordsList(ArrayList(it))
+                })
+            }
+            asynclist.forEach {
+                returnlist.addAll(it.await())
+            }
+            WordsList = returnlist
+            return true
+        } catch (e: IOException) {
+            Log.e("ERROR: IOException", "An error has occurred")
         }
         WordsList = returnlist
         return false
+    }
+    fun GenerateWordsList(wordsList: ArrayList<String>) : ArrayList<WordData>{
+        var returnlist = ArrayList<WordData>()
+        wordsList.forEach {
+            returnlist.add(WordData(it, GetStringValue(it)))
+        }
+        return returnlist
     }
     //calculate the value in an inline function instead as this long ass function will be used more than once
     inline fun GetStringValue(word: String): BigInteger{
