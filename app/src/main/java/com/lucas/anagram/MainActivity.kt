@@ -3,6 +3,7 @@ package com.lucas.anagram
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.core.view.isVisible
@@ -37,9 +38,14 @@ class MainActivity : AppCompatActivity() {
                     model.GetFile(10)
                 }
                 //asynchronously wait for task
-                asynctask.await()
-                //do not show progress circle after task has finished
-                showProgressCircle(false, "")
+                if(asynctask.await()){
+                    //do not show progress circle after task has finished
+                    showProgressCircle(false, "")
+                }else{
+                    showProgressCircle(true, "An Error Has Occurred, Please Check Your Internet Connection")
+                    progress_circular.isVisible = false
+                    Toast.makeText(this@MainActivity, "An Error Has Occurred!!", Toast.LENGTH_LONG).show()
+                }
             }
         }
         charTextbox.setText(model.RandomString)
