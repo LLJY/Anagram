@@ -117,16 +117,36 @@ class MainViewModel : ViewModel() {
      * If the word's value is equal to the anagram's value, they are both anagrams and we will add it to the list.
      * We will run this function asynchronously as it is rather heavy due to having to loop through thousands of words im the provided list.
      */
-    fun GetAnagrams(word: String) {
+    suspend fun GetAnagrams(word: String) {
         //clear the list before starting
         AnagramsList.clear()
-        var wd = WordData(word, GetStringValue(word))
-        WordsList.forEach{
+
+        val nproc = Runtime.getRuntime().availableProcessors()
+        //split list into nproc x 2 number of lists
+        val parallellist = ArrayList(WordsList.chunked(WordsList.size/(nproc*2)))
+        //We create this list to await it later on.
+        var asynclist = ArrayList<Deferred<List<String>>>()
+        parallellist.forEach{
+            //spawn tasks to find anagrams in every list, should speed things up slightly
+            asynclist.add(viewModelScope.async {
+                findAnagrams(word, it)
+            })
+        }
+        asynclist.forEach {
+            AnagramsList.addAll(it.await())
+        }
+
+        AnagramsList.sortBy { it.length }
+    }
+    fun findAnagrams(word: String, wordsList: List<WordData>): ArrayList<String>{
+        val wd = WordData(word, GetStringValue(word))
+        var returnlist = ArrayList<String>()
+        wordsList.forEach{
             //DO NOT bother calculating any string that is larger
             //if divisible by the word, it means it contains the same prime numbers(prime factorisation), hence is an anagram
             if(it.WordValue > -1 && wd.WordValue > -1) {
                 if (it.WordValue <= wd.WordValue && (wd.WordValue % it.WordValue) == 0L) {
-                    AnagramsList.add(it.Word)
+                    returnlist.add(it.Word)
                 }
             }else{
                 /*Fallback to brute forcing by sorting the strings and running .contains().
@@ -134,11 +154,11 @@ class MainViewModel : ViewModel() {
                 * The string operation is still much faster than using BigInteger, which is rather expensive. So take it as a compromise.
                  */
                 if(wd.Word.capitalize().toCharArray().sorted().joinToString().contains(it.Word.capitalize().toCharArray().sorted().joinToString())){
-                    AnagramsList.add(it.Word)
+                    returnlist.add(it.Word)
                 }
             }
         }
-        AnagramsList.sortBy { it.length }
+        return returnlist
     }
 
 }
