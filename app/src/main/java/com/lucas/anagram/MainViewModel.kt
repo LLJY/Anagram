@@ -99,6 +99,7 @@ class MainViewModel : ViewModel() {
                 AnagramsList.add(it.Word)
             }
         }
+        AnagramsList.sortBy { it.length }
     }
 
 }
