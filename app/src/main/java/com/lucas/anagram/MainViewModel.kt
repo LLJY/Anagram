@@ -27,24 +27,25 @@ class MainViewModel : ViewModel() {
      * prime numbers and each alphabet is assigned it's own unique prime, i.e.(A=2, M=41). This ensures a unique number is always calculated for each possible anagram.
      * We will then insert this unique calculated value.
      */
-    fun GetFile(timeout: Int) {
+    fun GetFile(timeout: Int): Boolean {
         var returnlist = ArrayList<WordData>()
         val end = System.currentTimeMillis()+ timeout //add timeout to current time
         var success = false
-        while(System.currentTimeMillis() < end || !success) { //loop until timeout is reached OR function was successfully executed
+        while(System.currentTimeMillis() < end) { //loop until timeout is reached OR function was successfully executed
             val url = URL("https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt")
             try {
                 val input = BufferedReader(InputStreamReader(url.openStream()))
                 input.lines().forEach{
                     returnlist.add(WordData(it, GetStringValue(it)))
                 }
-                success = true
+                WordsList = returnlist
+                return true
             } catch (e: IOException) {
-                success = false
                 Log.e("ERROR: IOException", "An error has occurred")
             }
         }
         WordsList = returnlist
+        return false
     }
     //calculate the value in an inline function instead as this long ass function will be used more than once
     inline fun GetStringValue(word: String): Long{
@@ -93,7 +94,8 @@ class MainViewModel : ViewModel() {
         var wd = WordData(word, GetStringValue(word))
         WordsList.forEach{
             //DO NOT bother calculating any string that is larger
-            if(it.Word.length == wd.Word.length && wd.WordValue == it.WordValue){
+            //if divisible by the word, it means it contains the same prime numbers(prime factorisation), hence is an anagram
+            if(it.WordValue <= wd.WordValue && (wd.WordValue % it.WordValue) == 0L ){
                 AnagramsList.add(it.Word)
             }
         }
