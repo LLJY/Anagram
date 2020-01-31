@@ -69,7 +69,8 @@ class MainViewModel : ViewModel() {
     //calculate the value in an inline function instead as this long ass function will be used more than once
     inline fun GetStringValue(word: String): Long{
         var value = 1L
-        word.forEach {
+        var prev = 0L
+        for(it in word){
             when(it.toUpperCase()){
                 'A' -> value *= 2
                 'B' -> value *= 3
@@ -98,6 +99,15 @@ class MainViewModel : ViewModel() {
                 'Y' -> value *= 97
                 'Z' -> value *= 101
             }
+            if(value >= prev){
+                prev = value
+            }else{
+                /*The only reason than value will not be more or equal to  he previous value is if there is an overflow situation as some words may exceed the 64bit Integer limit.
+                * set the value to -1 and we will deal with this case separately with a different fallback method in GetAnagrams()
+                 */
+                value = -1
+                break
+            }
         }
         return value
     }
@@ -114,8 +124,18 @@ class MainViewModel : ViewModel() {
         WordsList.forEach{
             //DO NOT bother calculating any string that is larger
             //if divisible by the word, it means it contains the same prime numbers(prime factorisation), hence is an anagram
-            if(it.WordValue <= wd.WordValue && (wd.WordValue % it.WordValue) == 0L ){
-                AnagramsList.add(it.Word)
+            if(it.WordValue > -1 && wd.WordValue > -1) {
+                if (it.WordValue <= wd.WordValue && (wd.WordValue % it.WordValue) == 0L) {
+                    AnagramsList.add(it.Word)
+                }
+            }else{
+                /*Fallback to brute forcing by sorting the strings and running .contains().
+                * This circumvents the need for BigInteger as we now have two methods to match the string, the prime method is faster than string operations, however
+                * The string operation is still much faster than using BigInteger, which is rather expensive. So take it as a compromise.
+                 */
+                if(wd.Word.capitalize().toCharArray().sorted().joinToString().contains(it.Word.capitalize().toCharArray().sorted().joinToString())){
+                    AnagramsList.add(it.Word)
+                }
             }
         }
         AnagramsList.sortBy { it.length }
