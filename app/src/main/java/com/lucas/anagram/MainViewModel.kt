@@ -31,7 +31,6 @@ class MainViewModel : ViewModel() {
     fun GetFile(timeout: Int): Boolean {
         var returnlist = ArrayList<WordData>()
         val end = System.currentTimeMillis()+ timeout //add timeout to current time
-        var success = false
         while(System.currentTimeMillis() < end) { //loop until timeout is reached OR function was successfully executed
             val url = URL("https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt")
             try {
