@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
+import java.math.BigInteger
 import java.net.URL
 import kotlin.collections.ArrayList
 
@@ -48,36 +49,36 @@ class MainViewModel : ViewModel() {
         return false
     }
     //calculate the value in an inline function instead as this long ass function will be used more than once
-    inline fun GetStringValue(word: String): Long{
-        var value = 1L
+    inline fun GetStringValue(word: String): BigInteger{
+        var value = 1.toBigInteger()
         word.forEach {
             when(it.toUpperCase()){
-                'A' -> value *= 2
-                'B' -> value *= 3
-                'C' -> value *= 5
-                'D' -> value *= 7
-                'E' -> value *= 11
-                'F' -> value *= 13
-                'G' -> value *= 17
-                'H' -> value *= 19
-                'I' -> value *= 23
-                'J' -> value *= 29
-                'K' -> value *= 31
-                'L' -> value *= 37
-                'M' -> value *= 41
-                'N' -> value *= 43
-                'O' -> value *= 47
-                'P' -> value *= 53
-                'Q' -> value *= 59
-                'R' -> value *= 61
-                'S' -> value *= 67
-                'T' -> value *= 71
-                'U' -> value *= 73
-                'V' -> value *= 79
-                'W' -> value *= 83
-                'X' -> value *= 89
-                'Y' -> value *= 97
-                'Z' -> value *= 101
+                'A' -> value *= 2.toBigInteger()
+                'B' -> value *= 3.toBigInteger()
+                'C' -> value *= 5.toBigInteger()
+                'D' -> value *= 7.toBigInteger()
+                'E' -> value *= 11.toBigInteger()
+                'F' -> value *= 13.toBigInteger()
+                'G' -> value *= 17.toBigInteger()
+                'H' -> value *= 19.toBigInteger()
+                'I' -> value *= 23.toBigInteger()
+                'J' -> value *= 29.toBigInteger()
+                'K' -> value *= 31.toBigInteger()
+                'L' -> value *= 37.toBigInteger()
+                'M' -> value *= 41.toBigInteger()
+                'N' -> value *= 43.toBigInteger()
+                'O' -> value *= 47.toBigInteger()
+                'P' -> value *= 53.toBigInteger()
+                'Q' -> value *= 59.toBigInteger()
+                'R' -> value *= 61.toBigInteger()
+                'S' -> value *= 67.toBigInteger()
+                'T' -> value *= 71.toBigInteger()
+                'U' -> value *= 73.toBigInteger()
+                'V' -> value *= 79.toBigInteger()
+                'W' -> value *= 83.toBigInteger()
+                'X' -> value *= 89.toBigInteger()
+                'Y' -> value *= 97.toBigInteger()
+                'Z' -> value *= 101.toBigInteger()
             }
         }
         return value
@@ -95,11 +96,11 @@ class MainViewModel : ViewModel() {
         WordsList.forEach{
             //DO NOT bother calculating any string that is larger
             //if divisible by the word, it means it contains the same prime numbers(prime factorisation), hence is an anagram
-            if(it.WordValue <= wd.WordValue && (wd.WordValue % it.WordValue) == 0L ){
+            if(it.WordValue <= wd.WordValue && (wd.WordValue % it.WordValue) == 0.toBigInteger() ){
                 AnagramsList.add(it.Word)
             }
         }
     }
 
 }
-data class WordData(var Word: String, var WordValue: Long)
+data class WordData(var Word: String, var WordValue: BigInteger)
