@@ -10,11 +10,13 @@ import java.io.InputStreamReader
 import java.net.URL
 import kotlin.collections.ArrayList
 import kotlinx.coroutines.*
+import kotlin.system.measureTimeMillis
 
 class MainViewModel : ViewModel() {
     var RandomString = ""
     var WordsList = ArrayList<WordData>()
     var AnagramsList = ArrayList<String>()
+    var ElapsedTime = 0L
     fun generateChars() {
         val alphabets = "QWERTYUIOPASDFGHJKLZXCVBNM"
         var returnstring = ""
@@ -118,28 +120,38 @@ class MainViewModel : ViewModel() {
      * We will run this function asynchronously as it is rather heavy due to having to loop through thousands of words im the provided list.
      */
     suspend fun GetAnagrams(word: String) {
+        val wd = WordData(word, GetStringValue(word))
+        ElapsedTime = 0
         //clear the list before starting
         AnagramsList.clear()
+        val time = measureTimeMillis {
+            //if wordvalue is -1, it means it will fall back to manual string comparison, which will benefit from the extra threads.
+            if(wd.WordValue == -1L) {
+                val nproc = Runtime.getRuntime().availableProcessors()
+                //split list into nproc x 2 number of lists
+                val parallellist = ArrayList(WordsList.chunked(WordsList.size / (nproc * 2)))
+                //We create this list to await it later on.
+                var asynclist = ArrayList<Deferred<List<String>>>()
+                parallellist.forEach {
+                    //spawn tasks to find anagrams in every list, should speed things up slightly
+                    asynclist.add(viewModelScope.async {
+                        findAnagrams(wd, it)
+                    })
+                }
+                asynclist.forEach {
+                    AnagramsList.addAll(it.await())
+                }
+                //Normal Arithmetic is actually slower with coroutines, just do it normally.
+            }else{
+                AnagramsList = findAnagrams(wd, WordsList)
+            }
 
-        val nproc = Runtime.getRuntime().availableProcessors()
-        //split list into nproc x 2 number of lists
-        val parallellist = ArrayList(WordsList.chunked(WordsList.size/(nproc*2)))
-        //We create this list to await it later on.
-        var asynclist = ArrayList<Deferred<List<String>>>()
-        parallellist.forEach{
-            //spawn tasks to find anagrams in every list, should speed things up slightly
-            asynclist.add(viewModelScope.async {
-                findAnagrams(word, it)
-            })
+            AnagramsList.sortBy { it.length }
         }
-        asynclist.forEach {
-            AnagramsList.addAll(it.await())
-        }
+        ElapsedTime = time
 
-        AnagramsList.sortBy { it.length }
     }
-    fun findAnagrams(word: String, wordsList: List<WordData>): ArrayList<String>{
-        val wd = WordData(word, GetStringValue(word))
+    fun findAnagrams(wd: WordData, wordsList: List<WordData>): ArrayList<String>{
         var returnlist = ArrayList<String>()
         wordsList.forEach{
             //DO NOT bother calculating any string that is larger
@@ -153,7 +165,7 @@ class MainViewModel : ViewModel() {
                 * This circumvents the need for BigInteger as we now have two methods to match the string, the prime method is faster than string operations, however
                 * The string operation is still much faster than using BigInteger, which is rather expensive. So take it as a compromise.
                  */
-                if(wd.Word.capitalize().toCharArray().sorted().joinToString().contains(it.Word.capitalize().toCharArray().sorted().joinToString())){
+                if(it.Word.length <= wd.Word.length && wd.Word.toCharArray().sorted().containsAll(it.Word.toUpperCase().toCharArray().sorted())){
                     returnlist.add(it.Word)
                 }
             }

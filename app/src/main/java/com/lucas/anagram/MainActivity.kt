@@ -1,16 +1,21 @@
 package com.lucas.anagram
 
+import android.content.Context
 import android.content.res.Configuration
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,12 +24,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         var model = ViewModelProvider(this).get(MainViewModel::class.java)
         showProgressCircle(false, "")
-        val RA = RecyclerAdapter(model.AnagramsList, this@MainActivity)
+        var RA = RecyclerAdapter(model.AnagramsList, this@MainActivity)
         //show a grid of 2(or 3 when landscape) and bind recycler adapter
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             my_recycler_view.layoutManager = GridLayoutManager(this, 3)
         }else{
             my_recycler_view.layoutManager = GridLayoutManager(this, 2)
+        }
+        if(model.AnagramsList.size != 0 && model.ElapsedTime != 0L){
+            displaytext.isVisible=true
+            displaytext.text = "Elapsed Time(ms): ${model.ElapsedTime}"
         }
         my_recycler_view.adapter = RA
         //if the wordlist has not been downloaded, download it
@@ -64,8 +73,11 @@ class MainActivity : AppCompatActivity() {
                     }
                     asyncTask.await()
                     //only stop progress circle after bind to feel more seamless.
-                    RA.notifyDataSetChanged()
+                    RA = RecyclerAdapter(model.AnagramsList, this@MainActivity)
+                    my_recycler_view.adapter = RA
                     showProgressCircle(false, "")
+                    displaytext.isVisible = true
+                    displaytext.text = "Elapsed Time(ms): ${model.ElapsedTime}"
                 }
             }
         }
