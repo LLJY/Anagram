@@ -130,15 +130,15 @@ class MainViewModel : ViewModel() {
                 //split list into nproc x 2 number of lists
                 val parallellist = ArrayList(WordsList.chunked(WordsList.size / (nproc * 2)))
                 //We create this list to await it later on.
-                var asynclist = ArrayList<Deferred<List<String>>>()
+                var asynclist = ArrayList<Deferred<ArrayList<String>>>()
                 parallellist.forEach {
                     //spawn tasks to find anagrams in every list, should speed things up slightly
                     asynclist.add(viewModelScope.async {
                         findAnagrams(wd, it)
                     })
                 }
-                asynclist.forEach {
-                    AnagramsList.addAll(it.await())
+                asynclist.awaitAll().forEach {
+                    AnagramsList.addAll(it)
                 }
                 //Normal Arithmetic is actually slower with coroutines, just do it normally.
             }else{
