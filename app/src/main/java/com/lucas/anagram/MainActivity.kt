@@ -1,6 +1,5 @@
 package com.lucas.anagram
 
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import android.widget.Toast
@@ -10,7 +9,6 @@ import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

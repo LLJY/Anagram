@@ -1,6 +1,5 @@
 package com.lucas.anagram
 
-import android.provider.Settings
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
