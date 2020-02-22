@@ -9,6 +9,7 @@ import java.io.InputStreamReader
 import java.net.URL
 import kotlin.collections.ArrayList
 import kotlinx.coroutines.*
+import java.math.BigInteger
 import kotlin.system.measureTimeMillis
 
 class MainViewModel : ViewModel() {
@@ -63,7 +64,12 @@ class MainViewModel : ViewModel() {
     fun GenerateWordsList(wordsList: ArrayList<String>) : ArrayList<WordData>{
         var returnlist = ArrayList<WordData>()
         wordsList.forEach {
-            returnlist.add(WordData(it, GetStringValue(it)))
+            val value = GetStringValue(it)
+            if(value > 0) {
+                returnlist.add(WordData(it, value, 0.toBigInteger()))
+            }else{
+                returnlist.add(WordData(it, value, GetStringValueBig(it)))
+            }
         }
         return returnlist
     }
@@ -112,6 +118,40 @@ class MainViewModel : ViewModel() {
         }
         return value
     }
+    inline fun GetStringValueBig(word: String): BigInteger {
+        var value = 1.toBigInteger()
+        for (it in word) {
+            when (it.toUpperCase()) {
+                'A' -> value *= 2.toBigInteger()
+                'B' -> value *= 3.toBigInteger()
+                'C' -> value *= 5.toBigInteger()
+                'D' -> value *= 7.toBigInteger()
+                'E' -> value *= 11.toBigInteger()
+                'F' -> value *= 13.toBigInteger()
+                'G' -> value *= 17.toBigInteger()
+                'H' -> value *= 19.toBigInteger()
+                'I' -> value *= 23.toBigInteger()
+                'J' -> value *= 29.toBigInteger()
+                'K' -> value *= 31.toBigInteger()
+                'L' -> value *= 37.toBigInteger()
+                'M' -> value *= 41.toBigInteger()
+                'N' -> value *= 43.toBigInteger()
+                'O' -> value *= 47.toBigInteger()
+                'P' -> value *= 53.toBigInteger()
+                'Q' -> value *= 59.toBigInteger()
+                'R' -> value *= 61.toBigInteger()
+                'S' -> value *= 67.toBigInteger()
+                'T' -> value *= 71.toBigInteger()
+                'U' -> value *= 73.toBigInteger()
+                'V' -> value *= 79.toBigInteger()
+                'W' -> value *= 83.toBigInteger()
+                'X' -> value *= 89.toBigInteger()
+                'Y' -> value *= 97.toBigInteger()
+                'Z' -> value *= 101.toBigInteger()
+            }
+        }
+        return value
+    }
 
     /***
      * the purpose of the function should be self explanatory if you understood the documentation above.
@@ -119,7 +159,14 @@ class MainViewModel : ViewModel() {
      * We will run this function asynchronously as it is rather heavy due to having to loop through thousands of words im the provided list.
      */
     suspend fun GetAnagrams(word: String) {
-        val wd = WordData(word, GetStringValue(word))
+        var wd : WordData
+        val value = GetStringValue(word)
+        if(value != -1L) {
+            wd = WordData(word, value, 0.toBigInteger())
+        }else{
+            wd = WordData(word, -1, GetStringValueBig(word))
+        }
+
         ElapsedTime = 0
         //clear the list before starting
         AnagramsList.clear()
@@ -159,12 +206,14 @@ class MainViewModel : ViewModel() {
                 if (it.WordValue <= wd.WordValue && (wd.WordValue % it.WordValue) == 0L) {
                     returnlist.add(it.Word)
                 }
-            }else{
-                /*Fallback to brute forcing by sorting the strings and running .contains().
-                * This circumvents the need for BigInteger as we now have two methods to match the string, the prime method is faster than string operations, however
-                * The string operation is still much faster than using BigInteger, which is rather expensive. So take it as a compromise.
+                /*Fallback to brute forcing by using BigInteger, which is faster than just brute forcing the string
                  */
-                if(it.Word.length <= wd.Word.length && wd.Word.toCharArray().sorted().containsAll(it.Word.toUpperCase().toCharArray().sorted())){
+            }else if(it.WordValue > -1){
+                if(it.Word.length <= wd.Word.length && (wd.WordValueBig % it.WordValue.toBigInteger()) == 0.toBigInteger()){
+                    returnlist.add(it.Word)
+                }
+            }else if(wd.WordValue > -1){
+                if(it.Word.length <= wd.Word.length && (wd.WordValue.toBigInteger() % it.WordValueBig) == 0.toBigInteger()){
                     returnlist.add(it.Word)
                 }
             }
@@ -173,4 +222,4 @@ class MainViewModel : ViewModel() {
     }
 
 }
-data class WordData(var Word: String, var WordValue: Long)
+data class WordData(var Word: String, var WordValue: Long, var WordValueBig: BigInteger)

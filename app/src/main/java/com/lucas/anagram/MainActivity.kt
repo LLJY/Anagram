@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         }
         if(model.AnagramsList.size != 0 && model.ElapsedTime != 0L){
             displaytext.isVisible=true
-            displaytext.text = "Elapsed Time(ms): ${model.ElapsedTime}"
+            displaytext.text = "Elapsed Time(ms): ${model.ElapsedTime} \nNumber Found: ${model.AnagramsList.size}"
         }
         my_recycler_view.adapter = RA
         //if the wordlist has not been downloaded, download it
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                     my_recycler_view.adapter = RA
                     showProgressCircle(false, "")
                     displaytext.isVisible = true
-                    displaytext.text = "Elapsed Time(ms): ${model.ElapsedTime}"
+                    displaytext.text = "Elapsed Time(ms): ${model.ElapsedTime} \nNumber Found: ${model.AnagramsList.size}"
                 }
             }
         }
