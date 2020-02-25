@@ -46,7 +46,7 @@ class MainViewModel : ViewModel() {
             val parallellist = ArrayList(list.chunked(list.size/(nproc*2)))
             var asynclist = ArrayList<Deferred<List<WordData>>>()
             parallellist.forEach{
-                asynclist.add(viewModelScope.async {
+                asynclist.add(viewModelScope.async(Dispatchers.IO) {
                     GenerateWordsList(ArrayList(it))
                 })
             }
@@ -180,7 +180,7 @@ class MainViewModel : ViewModel() {
                 var asynclist = ArrayList<Deferred<ArrayList<String>>>()
                 parallellist.forEach {
                     //spawn tasks to find anagrams in every list, should speed things up slightly
-                    asynclist.add(viewModelScope.async {
+                    asynclist.add(viewModelScope.async(Dispatchers.IO) {
                         findAnagrams(wd, it)
                     })
                 }
